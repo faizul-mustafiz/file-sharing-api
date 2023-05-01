@@ -1,11 +1,11 @@
-const { createClient, createCluster } = require('redis');
+const { createClient } = require('redis');
 const redisConfig = require('../configs/redis.config');
 const logger = require('../loggers/logger');
 /**
  * * create redisClient with redisLabs connection string url imported from the redisConfig
  */
 const redisClient = createClient({
-  url: redisConfig.url
+  url: redisConfig.url,
 });
 /**
  * * redisClient onConnect callback function
