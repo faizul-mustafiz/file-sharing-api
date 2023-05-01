@@ -2,8 +2,18 @@ const { generateFilePayloadForRedis } = require('../utility/file.utility');
 const {
   setPublicKeyIdentity,
   setPrivateKeyIdentity,
-} = require('../helpers/redis.helper');
-const { unlink, unlinkSync } = require('fs');
+} = require('./redis.helper');
+const { unlink } = require('fs');
+const { readConfigJsonFile } = require('../plugins/configFile.plugin');
+const { config } = require('../configs/file.config');
+const fileStorageConfig = readConfigJsonFile(config);
+const { bucketName } = fileStorageConfig;
+const { Storage } = require('@google-cloud/storage');
+const cloudStorage = new Storage({
+  keyFilename: config,
+});
+const bucket = cloudStorage.bucket(bucketName);
+
 const storeFileInfoDataToRedis = async (payload) => {
   if (payload && payload.keys && payload.file) {
     const { publicKey, privateKey } = payload.keys;
@@ -16,9 +26,11 @@ const storeFileInfoDataToRedis = async (payload) => {
     return { fileStoreResult, privateKeyStoreResult };
   }
 };
-
 const unlinkFileFromLocalStorage = async (fileInfo) => {
   return unlink(fileInfo.path);
 };
 
-module.exports = { storeFileInfoDataToRedis, unlinkFileFromLocalStorage };
+module.exports = {
+  storeFileInfoDataToRedis,
+  unlinkFileFromLocalStorage,
+};
