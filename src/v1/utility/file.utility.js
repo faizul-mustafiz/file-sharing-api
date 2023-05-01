@@ -1,5 +1,5 @@
 const { randomBytes } = require('crypto');
-
+const { existsSync } = require('fs');
 const generateKeyPair = () => {
   const publicKey = randomBytes(16).toString('hex');
   const privateKey = randomBytes(32).toString('hex');
@@ -37,9 +37,14 @@ const generateFileDeleteSuccessResponseResult = (payload) => {
   };
 };
 
+const checkIfFileExists = (path) => {
+  return existsSync(path);
+};
+
 module.exports = {
   generateKeyPair,
   generateFilePayloadForRedis,
   generateFileUploadSuccessResponseResult,
   generateFileDeleteSuccessResponseResult,
+  checkIfFileExists,
 };
