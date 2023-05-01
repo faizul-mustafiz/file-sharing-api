@@ -8,16 +8,10 @@ module.exports = {
 
   // redis environments variables
   REDIS_URL: process.env.REDIS_URL_TEST,
-  REDIS_HOST: process.env.REDIS_HOST,
-  REDIS_PORT: process.env.REDIS_PORT,
-  REDIS_USERNAME: process.env.REDIS_USERNAME,
-  REDIS_PASSWORD: process.env.REDIS_PASSWORD,
 
   // file storage environment variables
-  FOLDER: process.env.FOLDER,
-  BUCKET_NAME: process.env.BUCKET_NAME,
   PROVIDER: process.env.PROVIDER,
+  CONFIG: process.env.CONFIG,
   FORM_DATA_KEY: process.env.FORM_DATA_KEY,
   MAX_FILE_SIZE: process.env.MAX_FILE_SIZE,
-  MAX_FILES: process.env.MAX_FILES,
 };
