@@ -12,10 +12,6 @@ const generateFilePayloadForRedis = (payload) => {
       originalname: payload.file.originalname,
       mimetype: payload.file.mimetype,
       encoding: payload.file.encoding,
-      destination: payload.file.destination,
-      filename: payload.file.filename,
-      path: payload.file.path,
-      size: payload.file.size,
       publicKey: payload.keys.publicKey,
       privateKey: payload.keys.privateKey,
     };
@@ -25,7 +21,6 @@ const generateFileUploadSuccessResponseResult = (payload) => {
   if (payload && payload.file && payload.keys)
     return {
       fileName: payload.file.originalname,
-      path: payload.file.path,
       publicKey: payload.keys.publicKey,
       privateKey: payload.keys.privateKey,
     };
@@ -33,7 +28,6 @@ const generateFileUploadSuccessResponseResult = (payload) => {
 const generateFileDeleteSuccessResponseResult = (payload) => {
   return {
     fileName: payload.originalname,
-    path: payload.path,
   };
 };
 
