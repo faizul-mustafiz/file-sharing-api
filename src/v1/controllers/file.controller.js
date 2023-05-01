@@ -1,37 +1,69 @@
-const uploadFile = require('../middlewares/localBucketStorage.middleware');
+const { createReadStream, unlink } = require('fs');
+const logger = require('../loggers/logger');
+
 const {
   generateKeyPair,
   generateFileUploadSuccessResponseResult,
   generateFileDeleteSuccessResponseResult,
   checkIfFileExists,
 } = require('../utility/file.utility');
-const { createReadStream } = require('fs');
 
-const BadRequestError = require('../errors/BadRequestError');
-const { MulterError } = require('multer');
-const { MulterErrorResponse, Success } = require('../responses/httpResponse');
-const { storeFileInfoDataToRedis } = require('../helpers/fileStorageHelper');
-const logger = require('../loggers/logger');
-const { unlink, unlinkSync } = require('fs');
-const InternalServerError = require('../errors/InternalServerError');
-const FileControllerOrigin = require('../enums/fileControllerOrigin');
+const { provider, config } = require('../configs/file.config');
+const { readConfigJsonFile } = require('../plugins/configFile.plugin');
+
+const fileStorageConfig = readConfigJsonFile(config);
 const {
   deletePrivateKeyIdentity,
   deletePublicKeyIdentity,
 } = require('../helpers/redis.helper');
+const { storeFileInfoDataToRedis } = require('../helpers/file.helper');
+
+const { MulterError } = require('multer');
+const InternalServerError = require('../errors/InternalServerError');
+const BadRequestError = require('../errors/BadRequestError');
+const { Success, MulterErrorResponse } = require('../responses/httpResponse');
+const FileControllerOrigin = require('../enums/fileControllerOrigin');
+
+const processFile = require('../middlewares/processFile.middleware');
+
+/**
+ * * File store related imports
+ */
+const { bucketName } = fileStorageConfig;
+/**
+ * * google cloud bucket storage related imports
+ */
+const { Storage } = require('@google-cloud/storage');
+const Provider = require('../enums/provider.enum');
+const cloudStorage = new Storage({
+  keyFilename: config,
+});
+const bucket = cloudStorage.bucket(bucketName);
 
 upload = async (req, res, next) => {
   try {
     const { publicKey, privateKey } = generateKeyPair();
     req.keys = { publicKey, privateKey };
     logger.debug(req.keys);
-    await uploadFile(req, res);
-    logger.debug('req', req.file);
-    if (req.file == undefined) {
-      throw new BadRequestError(
-        'upload-file-not-present-in-request',
-        'please upload a file',
-      );
+    await processFile(req, res);
+    logger.info('req: %s', req.file);
+    if (provider == Provider.google) {
+      const { originalname, buffer } = req.file;
+      const blob = bucket.file(originalname);
+      const blobStream = blob.createWriteStream({
+        resumable: false,
+        metadata: {
+          contentType: req.file.mimetype,
+        },
+      });
+      blobStream.on('error', (error) => {
+        console.log('blob-create-write-stream-error', error);
+        throw new InternalServerError(
+          'blob-create-write-stream-error',
+          'File upload error',
+        );
+      });
+      blobStream.end(buffer);
     }
     const redisStoreResult = await storeFileInfoDataToRedis(req);
     logger.debug('file-info-stored-to-redis: %s', redisStoreResult);
@@ -50,22 +82,35 @@ upload = async (req, res, next) => {
 getFile = async (req, res, next) => {
   const fileInfo = res.locals.fileInfo;
   logger.debug('fileInfo: %s', fileInfo);
+  res.setHeader('Content-Type', fileInfo.mimetype);
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="${fileInfo.originalname}"`,
+  );
   try {
-    const filePath = fileInfo.path;
-    const fileExists = checkIfFileExists(filePath);
-    if (!fileExists) {
-      throw new BadRequestError(
-        'get-file-does-not-exists',
-        'Requested file does not exists in bucket',
-      );
+    if (provider == Provider.google) {
+      const blob = bucket.file(fileInfo.originalname);
+      const blobStream = blob.createReadStream();
+      blobStream.on('error', (error) => {
+        console.log('blob-create-read-stream-error', error);
+        throw new InternalServerError(
+          'blob-create-read-stream-error',
+          'File download error',
+        );
+      });
+      blobStream.pipe(res);
+    } else {
+      const filePath = `${bucketName}/${fileInfo.publicKey}`;
+      const fileExists = checkIfFileExists(filePath);
+      if (!fileExists) {
+        throw new BadRequestError(
+          'get-file-does-not-exists',
+          'Requested file does not exists in bucket',
+        );
+      }
+      const file = createReadStream(filePath);
+      file.pipe(res);
     }
-    const file = createReadStream(filePath);
-    res.setHeader('Content-Type', fileInfo.mimetype);
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${fileInfo.originalname}"`,
-    );
-    file.pipe(res);
   } catch (error) {
     error.origin = error.origin ? error.origin : FileControllerOrigin.getFile;
     next(error);
@@ -73,24 +118,37 @@ getFile = async (req, res, next) => {
 };
 deleteFile = async (req, res, next) => {
   const fileInfo = res.locals.fileInfo;
+  logger.debug('fileInfo: %s', fileInfo);
   try {
-    const filePath = fileInfo.path;
-    const fileExists = checkIfFileExists(filePath);
-    if (!fileExists) {
-      throw new BadRequestError(
-        'get-file-does-not-exists',
-        'Requested file does not exists in bucket',
-      );
-    }
-    unlink(filePath, async (error) => {
-      if (error) {
+    if (provider == Provider.google) {
+      try {
+        await bucket.file(fileInfo.originalname).delete();
+      } catch (error) {
+        console.log('file-delete-error', error);
         throw new InternalServerError('file-unlink-error', 'File delete error');
       }
-      const result = generateFileDeleteSuccessResponseResult(fileInfo);
-      await deletePublicKeyIdentity(fileInfo.publicKey);
-      await deletePrivateKeyIdentity(fileInfo.privateKey);
-      return Success(res, { message: 'File deleted', result });
-    });
+    } else {
+      const filePath = `${bucketName}/${fileInfo.publicKey}`;
+      const fileExists = checkIfFileExists(filePath);
+      if (!fileExists) {
+        throw new BadRequestError(
+          'get-file-does-not-exists',
+          'Requested file does not exists in bucket',
+        );
+      }
+      unlink(filePath, async (error) => {
+        if (error) {
+          throw new InternalServerError(
+            'file-unlink-error',
+            'File delete error',
+          );
+        }
+      });
+    }
+    const result = generateFileDeleteSuccessResponseResult(fileInfo);
+    await deletePublicKeyIdentity(fileInfo.publicKey);
+    await deletePrivateKeyIdentity(fileInfo.privateKey);
+    return Success(res, { message: 'File deleted', result });
   } catch (error) {
     error.origin = error.origin
       ? error.origin
