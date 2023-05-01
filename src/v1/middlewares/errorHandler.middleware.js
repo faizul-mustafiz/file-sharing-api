@@ -3,7 +3,7 @@ const ErrorHandler = (err, req, res, next) => {
   const errorMessage = err.message || 'Oops! something went wrong';
   return res.status(errorStatus).json({
     success: false,
-    message: errorStatus >= 500 ? 'Oops! something went wrong' : errorMessage,
+    message: errorMessage,
     result: {},
   });
 };
