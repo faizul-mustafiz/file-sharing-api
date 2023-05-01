@@ -3,3 +3,5 @@ const FileControllerOrigin = {
   getFile: 'get-file-base-error',
   deleteFile: 'delete-file-base-error',
 };
+
+module.exports = FileControllerOrigin;
