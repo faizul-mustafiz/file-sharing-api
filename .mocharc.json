@@ -1,0 +1,5 @@
+{
+  "spec": "src/v1/tests/index.test.js",
+  "timeout": 120000,
+  "exit": true
+}

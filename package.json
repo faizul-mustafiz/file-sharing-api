@@ -1,0 +1,47 @@
+{
+  "name": "file-sharing-api",
+  "version": "1.0.0",
+  "description": "This a file sharing rest api where user can upload, download and delete files",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faizul-mustafiz/file-sharing-api.git"
+  },
+  "keywords": [
+    "node.js",
+    "file-sharing",
+    "express",
+    "multer",
+    "local-bucket",
+    "cloud-bucket"
+  ],
+  "author": "faizul-mustafiz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/faizul-mustafiz/file-sharing-api/issues"
+  },
+  "homepage": "https://github.com/faizul-mustafiz/file-sharing-api#readme",
+  "dependencies": {
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "morgan": "^1.10.0",
+    "morgan-json": "^1.1.0",
+    "multer": "^1.4.5-lts.1",
+    "redis": "^4.6.5",
+    "winston": "^3.8.2"
+  },
+  "devDependencies": {
+    "chai": "^4.3.7",
+    "chai-http": "^4.3.0",
+    "mocha": "^10.2.0",
+    "nodemon": "^2.0.22",
+    "prettier": "^2.8.7",
+    "pretty-quick": "^3.1.3"
+  }
+}
