@@ -1,13 +1,13 @@
-const app = require("./src/v1/app");
-const { port, host } = require("./src/v1/configs/app.config");
-const { closeRedisPluginConnection } = require("./src/v1/plugins/redis.plugin");
-const logger = require("./src/v1/loggers/logger");
+const app = require('./src/v1/app');
+const { port, host } = require('./src/v1/configs/app.config');
+const { closeRedisPluginConnection } = require('./src/v1/plugins/redis.plugin');
+const logger = require('./src/v1/loggers/logger');
 
 /**
  * * create express server with port and host imported form app.config
  */
 const server = app.listen(port, host, () => {
-  logger.debug("Express is running on →");
+  logger.debug('Express is running on →');
   console.table({
     host: host,
     port: port,
@@ -21,7 +21,7 @@ const server = app.listen(port, host, () => {
  */
 const graceFullyCloseServerAndPluginConnections = (exitCode) => {
   server.close(() => {
-    logger.debug("Closing the Server...");
+    logger.debug('Closing the Server...');
     closeRedisPluginConnection();
     logger.debug(`Closing the main process with exitCode: ${exitCode}`);
     process.exit(exitCode);
@@ -32,8 +32,8 @@ const graceFullyCloseServerAndPluginConnections = (exitCode) => {
  * * this will log the uncaughtException error in the error logger and proceed to
  * *  process.exit with exitCode = 1. Which means the process exited with error
  */
-process.on("uncaughtException", (error) => {
-  logger.error("uncaughtException-error:", error);
+process.on('uncaughtException', (error) => {
+  logger.error('uncaughtException-error:', error);
   process.exit(1);
 });
 /**
@@ -41,8 +41,8 @@ process.on("uncaughtException", (error) => {
  * * this will log the unhandledRejection error in the error logger and proceed to
  * *  process.exit with exitCode = 1. Which means the process exited with error
  */
-process.on("unhandledRejection", (reason, promise) => {
-  logger.error("unhandledRejection-at %s, %s", promise, `reason: ${reason}`);
+process.on('unhandledRejection', (reason, promise) => {
+  logger.error('unhandledRejection-at %s, %s', promise, `reason: ${reason}`);
   process.exit(1);
 });
 /**
@@ -52,20 +52,20 @@ process.on("unhandledRejection", (reason, promise) => {
  */
 [`SIGINT`, `SIGUSR1`, `SIGUSR2`, `SIGTERM`].forEach((event) => {
   process.on(event, () => {
-    logger.debug("Process event type: %s", event);
+    logger.debug('Process event type: %s', event);
     graceFullyCloseServerAndPluginConnections(0);
   });
 });
 /**
  * * logs the beforeExit event log
  */
-process.on("beforeExit", (code) => {
+process.on('beforeExit', (code) => {
   logger.debug(`Process beforeExit event with code: ${code}`);
 });
 /**
  * * logs the exit event log
  */
-process.on("exit", (code) => {
+process.on('exit', (code) => {
   logger.debug(`Process exit event with code: ${code}`);
 });
 
