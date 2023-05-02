@@ -14,4 +14,9 @@ module.exports = {
   CONFIG: process.env.CONFIG,
   FORM_DATA_KEY: process.env.FORM_DATA_KEY,
   MAX_FILE_SIZE: process.env.MAX_FILE_SIZE,
+
+  // rate limiter environment variables
+  MAX_ALLOWED_REQUESTS: process.env.MAX_ALLOWED_REQUESTS,
+  WINDOW_TTL: process.env.WINDOW_TTL,
+  WINDOW_LOG_INTERVAL_TTL: process.env.WINDOW_LOG_INTERVAL_TTL,
 };

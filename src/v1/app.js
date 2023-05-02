@@ -9,6 +9,7 @@ const httpLogger = require('./loggers/httpLogger');
 const ErrorLogger = require('./middlewares/errorLogger.middleware');
 const ErrorHandler = require('./middlewares/errorHandler.middleware');
 const invalidPath = require('./middlewares/invalidPath.middleware');
+const { RateLimiter } = require('./middlewares/reateLimiter.middleware');
 /**
  * * initiate express and express community middleware
  */
@@ -23,6 +24,8 @@ app.use(
 app.use(bodyParser.json({ limit: '1mb' }));
 app.use(bodyParser.urlencoded({ limit: '1mb', extended: true }));
 app.use(cors());
+app.use(RateLimiter);
+
 /**
  * * Connect to redis client
  */

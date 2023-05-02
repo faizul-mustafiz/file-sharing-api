@@ -160,6 +160,48 @@ const deletePrivateKeyIdentity = async (identity) => {
 };
 
 /**
+ * * rate limiter related redis store method
+ */
+
+const isRateLimitRecordExists = async (identity) => {
+  try {
+    const result = await isIdentityExists(`rt:${identity}`);
+    logger.debug('isRateLimitRecordExists-result: %s', result);
+    return result;
+  } catch (error) {
+    logger.error('isRateLimitRecordExists-error:', error);
+  }
+};
+const setRateLimitRecord = async (identity, expiry, payload) => {
+  try {
+    const parsedPayload = JSON.stringify(payload);
+    const result = await setIdentity(`rt:${identity}`, expiry, parsedPayload);
+    logger.debug('setRateLimitRecord-result: %s', result);
+    return result;
+  } catch (error) {
+    logger.error('setRateLimitRecord-error:', error);
+  }
+};
+const getRateLimitRecord = async (identity) => {
+  try {
+    let result = await getIdentityPayload(`rt:${identity}`);
+    logger.debug('getRateLimitRecord-result: %s', result);
+    return JSON.parse(result);
+  } catch (error) {
+    logger.error('getRateLimitRecord-error:', error);
+  }
+};
+const deleteRateLimitRecord = async (identity) => {
+  try {
+    let result = await deleteIdentity(`rt:${identity}`);
+    logger.debug('deleteRateLimitRecord-result: %s', result);
+    return result;
+  } catch (error) {
+    logger.error('deleteRateLimitRecord-error:', error);
+  }
+};
+
+/**
  * * clean up redis test db after test complete
  */
 const deleteTestDataFromRedis = async () => {
@@ -180,5 +222,9 @@ module.exports = {
   setPrivateKeyIdentity,
   getPrivateKeyIdentity,
   deletePrivateKeyIdentity,
+  isRateLimitRecordExists,
+  setRateLimitRecord,
+  getRateLimitRecord,
+  deleteRateLimitRecord,
   deleteTestDataFromRedis,
 };
