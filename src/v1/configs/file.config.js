@@ -6,7 +6,7 @@ const {
 } = require('../environments');
 
 module.exports = {
-  provider: PROVIDER,
+  provider: PROVIDER || 'local',
   config: CONFIG,
   formDataKey: FORM_DATA_KEY,
   maxFileSize: MAX_FILE_SIZE,
