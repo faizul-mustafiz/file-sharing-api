@@ -64,11 +64,6 @@ const StoreFile = async (req, res, next) => {
 const FetchFile = async (req, res, next) => {
   const fileInfo = res.locals.fileInfo;
   logger.debug('fileInfo: %s', fileInfo);
-  res.setHeader('Content-Type', fileInfo.mimetype);
-  res.setHeader(
-    'Content-Disposition',
-    `attachment; filename="${fileInfo.originalname}"`,
-  );
   try {
     const filePath = `${bucketName}/${fileInfo.publicKey}`;
     const fileExists = checkIfFileExists(filePath);
@@ -79,6 +74,11 @@ const FetchFile = async (req, res, next) => {
       );
     }
     const file = createReadStream(filePath);
+    res.setHeader('Content-Type', fileInfo.mimetype);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${fileInfo.originalname}"`,
+    );
     file.pipe(res);
   } catch (error) {
     error.origin = error.origin ? error.origin : FileControllerOrigin.fetchFile;

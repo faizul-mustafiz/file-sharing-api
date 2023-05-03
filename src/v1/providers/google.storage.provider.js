@@ -85,11 +85,6 @@ const StoreFile = async (req, res, next) => {
 const FetchFile = async (req, res, next) => {
   const fileInfo = res.locals.fileInfo;
   logger.debug('fileInfo: %s', fileInfo);
-  res.setHeader('Content-Type', fileInfo.mimetype);
-  res.setHeader(
-    'Content-Disposition',
-    `attachment; filename="${fileInfo.originalname}"`,
-  );
   try {
     const blob = bucket.file(fileInfo.originalname);
     const blobStream = blob.createReadStream();
@@ -100,6 +95,11 @@ const FetchFile = async (req, res, next) => {
         'File download error',
       );
     });
+    res.setHeader('Content-Type', fileInfo.mimetype);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="${fileInfo.originalname}"`,
+    );
     blobStream.pipe(res);
   } catch (error) {
     error.origin = error.origin ? error.origin : FileControllerOrigin.fetchFile;
