@@ -2,6 +2,12 @@ const app = require('./src/v1/app');
 const { port, host } = require('./src/v1/configs/app.config');
 const { closeRedisPluginConnection } = require('./src/v1/plugins/redis.plugin');
 const logger = require('./src/v1/loggers/logger');
+/**
+ * * inject file cleanup scheduler plugin
+ */
+
+const fileCleanupSchedular = require('./src/v1/plugins/fileCleanupScheduler.plugin');
+fileCleanupSchedular.start();
 
 /**
  * * create express server with port and host imported form app.config
@@ -23,6 +29,7 @@ const graceFullyCloseServerAndPluginConnections = (exitCode) => {
   server.close(() => {
     logger.debug('Closing the Server...');
     closeRedisPluginConnection();
+    fileCleanupSchedular.stop();
     logger.debug(`Closing the main process with exitCode: ${exitCode}`);
     process.exit(exitCode);
   });

@@ -73,10 +73,8 @@ const deleteRedisKeysAfterBucketCleanup = () => {
   }
 };
 
-const fileCleanupSchedular = async () => {
-  const cornFunction =
-    provider === Provider.local ? cleanUpLocalStorage : cleanupCloudStorage;
-  corn.schedule(`*/${cleanupJobInterval} * * *`, cornFunction);
-};
+const fileCleanupSchedular = async () => {};
+const cornFunction =
+  provider === Provider.local ? cleanUpLocalStorage : cleanupCloudStorage;
 
-module.exports = { fileCleanupSchedular };
+module.exports = corn.schedule(`0 0 0 ${cleanupJobInterval} * *`, cornFunction);
