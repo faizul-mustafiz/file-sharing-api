@@ -41,14 +41,14 @@ const StoreFile = async (req, res, next) => {
     const { publicKey, privateKey } = generateKeyPair();
     req.keys = { publicKey, privateKey };
     logger.debug(req.keys);
+    await processFile(req, res);
+    logger.info('req: %s', req.file);
     if (req.file == undefined) {
       throw new BadRequestError(
         'upload-file-not-present-in-request',
         'Please upload a file',
       );
     }
-    await processFile(req, res);
-    logger.info('req: %s', req.file);
     const { originalname, buffer } = req.file;
     const blob = bucket.file(originalname);
     const blobStream = blob.createWriteStream({
