@@ -202,6 +202,18 @@ const deleteRateLimitRecord = async (identity) => {
 };
 
 /**
+ * * clean up redis data after storage cleanup job
+ */
+const deleteDataFromRedis = async () => {
+  try {
+    const result = await redisClient.flushDb('ASYNC');
+    logger.debug('deleteDataFromRedis-result: %s', result);
+  } catch (error) {
+    logger.error('deleteDataFromRedis-error', error);
+  }
+};
+
+/**
  * * clean up redis test db after test complete
  */
 const deleteTestDataFromRedis = async () => {
@@ -226,5 +238,6 @@ module.exports = {
   setRateLimitRecord,
   getRateLimitRecord,
   deleteRateLimitRecord,
+  deleteDataFromRedis,
   deleteTestDataFromRedis,
 };

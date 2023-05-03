@@ -30,6 +30,15 @@ app.use(RateLimiter);
  * * Connect to redis client
  */
 const redisPlugin = require('./plugins/redis.plugin');
+
+/**
+ * * inject file cleanup scheduler plugin
+ */
+
+const {
+  fileCleanupSchedular,
+} = require('./plugins/fileCleanupScheduler.plugin');
+fileCleanupSchedular();
 /**
  * * A basic health check route above all the routes for checking if the application is running
  */

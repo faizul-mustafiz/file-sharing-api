@@ -19,4 +19,7 @@ module.exports = {
   MAX_ALLOWED_REQUESTS: process.env.MAX_ALLOWED_REQUESTS,
   WINDOW_TTL: process.env.WINDOW_TTL,
   WINDOW_LOG_INTERVAL_TTL: process.env.WINDOW_LOG_INTERVAL_TTL,
+
+  // file cleanup related variables
+  CLEANUP_JOB_INTERVAL: process.env.CLEANUP_JOB_INTERVAL,
 };
