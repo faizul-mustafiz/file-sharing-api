@@ -48,7 +48,7 @@ const cleanupCloudStorage = async () => {
   logger.info('cloud-storage-cleanup-job-started');
   try {
     const [files] = await bucket.getFiles();
-    logger.info('cloud-storage-files', files);
+    logger.info('cloud-storage-files %s', files);
     if (files.length > 0) {
       files.forEach(async (file) => {
         try {
@@ -73,8 +73,9 @@ const deleteRedisKeysAfterBucketCleanup = () => {
   }
 };
 
-const fileCleanupSchedular = async () => {};
 const cornFunction =
   provider === Provider.local ? cleanUpLocalStorage : cleanupCloudStorage;
 
-module.exports = corn.schedule(`0 0 0 ${cleanupJobInterval} * *`, cornFunction);
+const cornExpression = `0 0 0 ${cleanupJobInterval} * *`;
+
+module.exports = corn.schedule(cornExpression, cornFunction);

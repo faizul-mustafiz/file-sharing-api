@@ -1,9 +1,7 @@
 const rateLimit = require('express-rate-limit');
 const {
-  isRateLimitRecordExists,
   setRateLimitRecord,
   getRateLimitRecord,
-  deleteRateLimitRecord,
 } = require('../helpers/redis.helper');
 const moment = require('moment');
 const TooManyRequestsError = require('../errors/TooManyRequestsError');
@@ -29,8 +27,10 @@ const RateLimiter = async (req, res, next) => {
     const currentRequestTime = moment();
     logger.debug('currentRequestTime: $s', currentRequestTime.unix());
 
-    const rateLimitRecordExpiryTTL = currentRequestTime.add(windowTTL, 'hours');
-    console.log('rateLimitRecordExpiryTTL', rateLimitRecordExpiryTTL);
+    const rateLimitRecordExpiryTTL = currentRequestTime
+      .add(windowTTL, 'hours')
+      .unix();
+    logger.debug('rateLimitRecordExpiryTTL: %s', rateLimitRecordExpiryTTL);
 
     if (rateLimitRecord == null) {
       let newRecord = [];
