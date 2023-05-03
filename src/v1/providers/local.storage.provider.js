@@ -36,6 +36,12 @@ const StoreFile = async (req, res, next) => {
     const { publicKey, privateKey } = generateKeyPair();
     req.keys = { publicKey, privateKey };
     logger.debug(req.keys);
+    if (req.file == undefined) {
+      throw new BadRequestError(
+        'upload-file-not-present-in-request',
+        'Please upload a file',
+      );
+    }
     await processFile(req, res);
     logger.info('req: %s', req.file);
     const redisStoreResult = await storeFileInfoDataToRedis(req);
